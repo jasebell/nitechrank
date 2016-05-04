@@ -14,7 +14,7 @@
        (re-find #"Total Jobs Found: \d+")))
 
 (defn calc-index [today]
-  (* 100 (/ base-number today)))
+  (double (* 100 (/ today base-number))))
 
 (defn run-queries []
   (apply + (mapv (fn [query] (-> (pull-data query)
@@ -25,14 +25,14 @@
 (defn gen-output []
   (let [today (run-queries)
         today-index (calc-index today)
-        chg (- 100 today-index)
+        chg (double (- today-index 100))
         output (str (f/unparse (f/formatters :date) (t/now))
                     ","
                     today
                     ","
                     today-index
                     ","
-                    chg)
+                    chg "\n")
         tweet (str "#nitechrank " (f/unparse (f/formatters :date) (t/now))
                    " Index:" today-index
                    " Change:" chg "\n")]
