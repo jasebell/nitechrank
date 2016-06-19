@@ -9,6 +9,13 @@
 
 (def queries ["hadoop" "java" "php" "perl" "python" "ruby" "ios" "c++"])
 
+(defn get-last-reading [filepath]
+  (-> (slurp filepath)
+      (str/split #"\n")
+      last
+      (str/split #",")
+      last))
+
 (defn pull-data [query]
   (->> (slurp (format "http://www.nijobs.com/ShowResults.aspx?Keywords=%s&Location=&Category=3&Recruiter=Company" query))
        (re-find #"Total Jobs Found: \d+")))
@@ -24,8 +31,10 @@
                                  (Integer/parseInt))) queries)))
 (defn gen-output []
   (let [today (run-queries)
+        last-reading (java.lang.Double/valueOf (get-last-reading filepath))
         today-index (calc-index today)
         chg (double (- today-index 100))
+        prev-diff (- chg last-reading)
         output (str (f/unparse (f/formatters :date) (t/now))
                     ","
                     today
@@ -35,7 +44,8 @@
                     chg "\n")
         tweet (str "#nitechrank " (f/unparse (f/formatters :date) (t/now))
                    " Index:" today-index
-                   " Change:" chg "\n")]
+                   " Change:" chg "\n"
+                   " PrevDiff:" prev-diff)]
     (spit filepath output :append true)
     (println tweet)))
 
