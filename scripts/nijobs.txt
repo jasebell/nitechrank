@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# Iterate through the languages and pull the info from nijobs.com
+# The echo -n means the loop won't output a newline.
+for i in hadoop java php perl python ruby ios c++; do echo -n $i >> jobsoutput.txt ; curl http://www.nijobs.com/ShowResults.aspx?Keywords=$i\&Location=\&Category=3\&Recruiter=Company | grep "Total Jobs Found:" >> jobsoutput.txt ; done
+
+# Clean up the grep'd html to remove the tags and replace with a comma.
+awk '{sub(/[ \t]+\<label style\=\"margin-right\:30px\;\">Total Jobs Found: /,",")};1' jobsoutput.txt > jobstemp.txt
+awk '{sub(/\<\/label\>/,"")};1' jobstemp.txt > jobstemp2.txt
+awk '{sub(/\n/,",")};1' jobstemp2.txt > nijobsoutput.txt
+
+# Remove the files we don't need anymore.
+rm jobsoutput.txt jobstemp.txt jobstemp2.txt
